@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, time
-import icalendar
 
 # Read data from XLSX file
 classes_data = pd.read_excel('input.xlsx', sheet_name='classes')
