@@ -27,8 +27,8 @@ class_name = st.text_input("Enter class name")
 
 # Filter data based on user input
 if class_name:
-    classes_match = classes_data[classes_data['class_name'] == class_name]
-    rehearsals_match = rehearsals_data[rehearsals_data['class_name'] == class_name]
+    classes_match = classes_data[classes_data['class_name'].str.contains(class_name, case=False)]
+    rehearsals_match = rehearsals_data[rehearsals_data['class_name'].str.contains(class_name, case=False)]
 
     # Display classes data
     if not classes_match.empty:
