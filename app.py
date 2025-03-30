@@ -14,7 +14,7 @@ rehearsals_data = pd.read_excel("input.xlsx", sheet_name="rehearsals")
 st.title("CDF&S May Performance Rehearsal Helper")
 
 # Get user input for class name
-class_name_list = classes_data['class_name'].apply(lambda x: x.split(' -- ')[0] if ' -- ' in x else x).unique()
+class_name_list = classes_data["class_name"].unique()
 class_name = st.selectbox("Enter class name", [""] + class_name_list.tolist())
 
 # Filter data based on user input
@@ -68,6 +68,7 @@ if class_name:
                 "name",
                 "Date",
                 "class_name",
+                "dance_name",
                 "location",
                 "Start Time",
                 "End Time",
@@ -80,8 +81,10 @@ if class_name:
                 "name": "Rehearsal",
                 "location": "Location",
                 "class_name": "Class",
+                "dance_name": "Dance Name",
                 "information": "Information",
             }
         )
         rehearsals_table["Information"] = rehearsals_table["Information"].fillna("")
+        rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
         st.markdown(rehearsals_table.to_markdown(index=False))
