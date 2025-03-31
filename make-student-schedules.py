@@ -118,6 +118,8 @@ for student in class_rosters["student"].unique():
         # Write a section heading for the rehearsals
         f.write("## Rehearsals\n\n")
 
+        student_rehearsals_data.sort_values(by=["Date", "Start Time"], inplace=True)
+
         # Create a table from the tabulate library
         rehearsals_table = tabulate(
             student_rehearsals_data,

@@ -87,4 +87,5 @@ if class_name:
         )
         rehearsals_table["Information"] = rehearsals_table["Information"].fillna("")
         rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
+        rehearsals_table.sort_values(by=["Date", "Start Time"], inplace=True)
         st.markdown(rehearsals_table.to_markdown(index=False))
