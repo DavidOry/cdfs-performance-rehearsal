@@ -1,10 +1,7 @@
 import pandas as pd
-from fpdf import FPDF
 import os
 from tabulate import tabulate
 from datetime import time
-import markdown
-import pypandoc
 
 # Read in input.xlsx
 classes_data = pd.read_excel("input.xlsx", sheet_name="classes")
@@ -20,24 +17,30 @@ if not os.path.exists("student-schedules"):
 # Loop through each unique student in the class-rosters file
 for student in class_rosters["student"].unique():
 
+    print(student)
+
     # Filter the class-rosters data to get the classes for this student
-    student_classes = class_rosters[class_rosters["student"] == student][
-        "class_name"
-    ].tolist()
+    student_classes = (
+        class_rosters[class_rosters["student"] == student]["class_name"]
+        .str.lower()
+        .tolist()
+    )
 
     # Filter the classes_data to get the classes for this student
     student_classes_data = classes_data[
-        classes_data["class_name"].isin(student_classes)
+        classes_data["class_name"].str.lower().isin(student_classes)
     ]
 
-    # student_classes_data = classes_data[
-    #     classes_data["class_name"].apply(lambda x: any(sc in x for sc in student_classes))
-    # ]
+    if student_classes_data.empty:
+        continue
 
     # Filter the rehearsals_data to get the rehearsals for this student
     student_rehearsals_data = rehearsals_data[
-        rehearsals_data["class_name"].isin(student_classes)
+        rehearsals_data["class_name"].str.lower().isin(student_classes)
     ]
+
+    if student_rehearsals_data.empty:
+        continue
 
     # Add the URL to the name field in the rehearsals data
     student_rehearsals_data["name"] = student_rehearsals_data.apply(
@@ -55,7 +58,7 @@ for student in class_rosters["student"].unique():
         }
     )
 
-    student_classes_data.loc[:, "Time"] = student_classes_data["Time"].apply(
+    student_classes_data.loc[:, "Time"] = student_classes_data.loc[:, "Time"].apply(
         lambda x: x.strftime("%I:%M %p") if pd.notnull(x) else ""
     )
 
@@ -64,17 +67,17 @@ for student in class_rosters["student"].unique():
     student_classes_data["Day"] = student_classes_data["Day"].fillna("")
 
     # Rehearsal data
-    student_rehearsals_data.loc[:, "Date"] = student_rehearsals_data["date"].apply(
-        lambda x: x.strftime("%B %d, %Y")
-    )
-    student_rehearsals_data.loc[:, "Start Time"] = student_rehearsals_data[
-        "start_time"
+    student_rehearsals_data.loc[:, "Date"] = student_rehearsals_data.loc[
+        :, "date"
+    ].apply(lambda x: x.strftime("%B %d, %Y"))
+    student_rehearsals_data.loc[:, "Start Time"] = student_rehearsals_data.loc[
+        :, "start_time"
     ].apply(lambda x: x.strftime("%I:%M %p"))
-    student_rehearsals_data.loc[:, "End Time"] = student_rehearsals_data[
-        "end_time"
+    student_rehearsals_data.loc[:, "End Time"] = student_rehearsals_data.loc[
+        :, "end_time"
     ].apply(lambda x: x.strftime("%I:%M %p"))
-    student_rehearsals_data.loc[:, "Arrival Time"] = student_rehearsals_data[
-        "arrival_time"
+    student_rehearsals_data.loc[:, "Arrival Time"] = student_rehearsals_data.loc[
+        :, "arrival_time"
     ].apply(lambda x: x.strftime("%I:%M %p") if isinstance(x, time) else "")
     student_rehearsals_data = student_rehearsals_data[
         [
@@ -97,7 +100,9 @@ for student in class_rosters["student"].unique():
         }
     )
 
-    student_rehearsals_data["Dance Name"] = student_rehearsals_data["Dance Name"].fillna("")
+    student_rehearsals_data["Dance Name"] = student_rehearsals_data[
+        "Dance Name"
+    ].fillna("")
 
     with open(os.path.join("student-schedules", f"{student}.md"), "w") as f:
         f.write(f"# {student}\n\n")
@@ -126,7 +131,16 @@ for student in class_rosters["student"].unique():
             headers="keys",
             tablefmt="markdown",
             showindex=False,
-            colalign=("left", "left", "left", "left", "left", "right", "right", "right"),
+            colalign=(
+                "left",
+                "left",
+                "left",
+                "left",
+                "left",
+                "right",
+                "right",
+                "right",
+            ),
         )
 
         # Write the rehearsals table to the Markdown file
