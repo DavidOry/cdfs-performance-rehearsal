@@ -47,6 +47,7 @@ if class_name:
     if not rehearsals_match.empty:
         st.write("Rehearsals:")
         rehearsals_table = rehearsals_match.copy()
+        rehearsals_table.sort_values(by=["date", "start_time"], inplace=True)
         rehearsals_table["Date"] = rehearsals_table["date"].apply(
             lambda x: x.strftime("%B %d, %Y")
         )
@@ -87,5 +88,4 @@ if class_name:
         )
         rehearsals_table["Information"] = rehearsals_table["Information"].fillna("")
         rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
-        rehearsals_table.sort_values(by=["Date", "Start Time"], inplace=True)
         st.markdown(rehearsals_table.to_markdown(index=False))
