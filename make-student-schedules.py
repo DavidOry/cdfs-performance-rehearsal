@@ -42,6 +42,8 @@ for student in class_rosters["student"].unique():
     if student_rehearsals_data.empty:
         continue
 
+    student_rehearsals_data.sort_values(by=["date", "start_time"], inplace=True)
+
     # Add the URL to the name field in the rehearsals data
     student_rehearsals_data["name"] = student_rehearsals_data.apply(
         lambda row: f"[{row['name']}]({row['url']})" if row["url"] else row["name"],
@@ -69,7 +71,7 @@ for student in class_rosters["student"].unique():
     # Rehearsal data
     student_rehearsals_data.loc[:, "Date"] = student_rehearsals_data.loc[
         :, "date"
-    ].apply(lambda x: x.strftime("%B %d, %Y"))
+    ].apply(lambda x: x.strftime("%a, %b %d"))
     student_rehearsals_data.loc[:, "Start Time"] = student_rehearsals_data.loc[
         :, "start_time"
     ].apply(lambda x: x.strftime("%I:%M %p"))
@@ -122,8 +124,6 @@ for student in class_rosters["student"].unique():
 
         # Write a section heading for the rehearsals
         f.write("## Rehearsals\n\n")
-
-        student_rehearsals_data.sort_values(by=["Date", "Start Time"], inplace=True)
 
         # Create a table from the tabulate library
         rehearsals_table = tabulate(

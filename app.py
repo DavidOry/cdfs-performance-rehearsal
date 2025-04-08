@@ -20,15 +20,18 @@ class_name = st.selectbox("Enter class name", [""] + class_name_list.tolist())
 # Filter data based on user input
 if class_name:
     classes_match = classes_data[
-        classes_data["class_name"].str.contains(class_name, case=False)
+        classes_data["class_name"].str.fullmatch(class_name, case=False)
     ]
+    classes_match["time_of_day"] = classes_match["time_of_day"].apply(
+        lambda x: x.strftime("%I:%M %p") if pd.notnull(x) else ""
+    )
     rehearsals_match = rehearsals_data[
-        rehearsals_data["class_name"].str.contains(class_name, case=False)
+        rehearsals_data["class_name"].str.fullmatch(class_name, case=False)
     ]
 
     # Display classes data
     if not classes_match.empty:
-        st.write("Class Information:")
+        st.write("### Class Information:")
         st.dataframe(
             classes_match.rename(
                 columns={
@@ -45,11 +48,21 @@ if class_name:
 
     # Display rehearsals data with download buttons
     if not rehearsals_match.empty:
-        st.write("Rehearsals:")
+        st.write("### Rehearsals:")
+        st.write("##### Links to CDF&S Website Rehearsal Information:")
+        st.write(
+            "\t [Information on May 3rd Rehearsal](https://www.cdandfs.com/may-3rd-ballet-rehearsal.html)"
+        )
+        st.write(
+            "\t [Information for Technical Rehearsal](https://www.cdandfs.com/tech-rehearsals.html)"
+        )
+        st.write(
+            "\t [Information for Dress Rehearsal](https://www.cdandfs.com/dress-rehearsals.html)"
+        )
         rehearsals_table = rehearsals_match.copy()
         rehearsals_table.sort_values(by=["date", "start_time"], inplace=True)
         rehearsals_table["Date"] = rehearsals_table["date"].apply(
-            lambda x: x.strftime("%B %d, %Y")
+            lambda x: x.strftime("%a, %b %d")
         )
         rehearsals_table["Start Time"] = rehearsals_table["start_time"].apply(
             lambda x: x.strftime("%I:%M %p")
@@ -60,10 +73,10 @@ if class_name:
         rehearsals_table["Arrival Time"] = rehearsals_table["arrival_time"].apply(
             lambda x: x.strftime("%I:%M %p") if isinstance(x, time) else ""
         )
-        rehearsals_table["name"] = rehearsals_table.apply(
-            lambda row: f"[{row['name']}]({row['url']})" if row["url"] else row["name"],
-            axis=1,
-        )
+        # rehearsals_table["name"] = rehearsals_table.apply(
+        #     lambda row: f"[{row['name']}]({row['url']})" if row["url"] else row["name"],
+        #     axis=1,
+        # )
         rehearsals_table = rehearsals_table[
             [
                 "name",
@@ -88,4 +101,20 @@ if class_name:
         )
         rehearsals_table["Information"] = rehearsals_table["Information"].fillna("")
         rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
-        st.markdown(rehearsals_table.to_markdown(index=False))
+        rehearsals_table.style.set_properties(**{"white-space": "pre-wrap"})
+
+        st.write("##### Rehearsal Schedule as a Table:")
+        st.dataframe(rehearsals_table, use_container_width=True, hide_index=True)
+        # st.markdown(rehearsals_table.to_markdown(index=False))
+        st.write("##### Rehearsal Schedule as a List:")
+        for index, row in rehearsals_table.iterrows():
+            st.write(f"**{row['Rehearsal']}**")
+            st.write(f"* *_Date_*: {row['Date']}")
+            st.write(f"* *_Class_*: {row['Class']}")
+            st.write(f"* *_Dance Name_*: {row['Dance Name']}")
+            st.write(f"* *_Location_*: {row['Location']}")
+            st.write(f"* *_Start Time_*: {row['Start Time']}")
+            st.write(f"* *_End Time_*: {row['End Time']}")
+            st.write(f"* *_Arrival Time_*: {row['Arrival Time']}")
+            st.write(f"* *_Information_*: {row['Information']}")
+            st.write("\n")
