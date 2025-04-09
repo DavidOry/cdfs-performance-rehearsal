@@ -48,7 +48,7 @@ if class_name:
 
     # Display rehearsals data with download buttons
     if not rehearsals_match.empty:
-        st.write("### Rehearsals:")
+        st.write("### Rehearsal and Performance Information:")
         st.write("##### Links to CDF&S Website Rehearsal Information:")
         st.write(
             "\t [Information on May 3rd Rehearsal](https://www.cdandfs.com/may-3rd-ballet-rehearsal.html)"
@@ -59,6 +59,10 @@ if class_name:
         st.write(
             "\t [Information for Dress Rehearsal](https://www.cdandfs.com/dress-rehearsals.html)"
         )
+        st.write(
+            "\t [Information for the Performances](https://www.cdandfs.com/performances.html)"
+        )
+
         rehearsals_table = rehearsals_match.copy()
         rehearsals_table.sort_values(by=["date", "start_time"], inplace=True)
         rehearsals_table["Date"] = rehearsals_table["date"].apply(
