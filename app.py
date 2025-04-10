@@ -96,7 +96,7 @@ if class_name:
         ]
         rehearsals_table = rehearsals_table.rename(
             columns={
-                "name": "Rehearsal",
+                "name": "Rehearsal/Performance",
                 "location": "Location",
                 "class_name": "Class",
                 "dance_name": "Dance Name",
