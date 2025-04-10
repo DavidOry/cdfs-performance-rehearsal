@@ -123,7 +123,7 @@ for student in class_rosters["student"].unique():
         f.write("\n\n")
 
         # Write a section heading for the rehearsals
-        f.write("## Rehearsals\n\n")
+        f.write("## Rehearsals & Performances\n\n")
 
         # Create a table from the tabulate library
         rehearsals_table = tabulate(

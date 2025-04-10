@@ -107,10 +107,10 @@ if class_name:
         rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
         rehearsals_table.style.set_properties(**{"white-space": "pre-wrap"})
 
-        st.write("##### Rehearsal Schedule as a Table:")
+        st.write("##### Rehearsal & Performance Schedule as a Table:")
         st.dataframe(rehearsals_table, use_container_width=True, hide_index=True)
         # st.markdown(rehearsals_table.to_markdown(index=False))
-        st.write("##### Rehearsal Schedule as a List:")
+        st.write("##### Rehearsal & Performance Schedule as a List:")
         for index, row in rehearsals_table.iterrows():
             st.write(f"**{row['Rehearsal']}**")
             st.write(f"* *_Date_*: {row['Date']}")
