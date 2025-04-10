@@ -95,7 +95,7 @@ for student in class_rosters["student"].unique():
     ]
     student_rehearsals_data = student_rehearsals_data.rename(
         columns={
-            "name": "Rehearsal",
+            "name": "Rehearsal/Performance",
             "location": "Location",
             "class_name": "Class",
             "dance_name": "Dance Name",

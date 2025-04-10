@@ -104,7 +104,7 @@ if class_name:
             }
         )
         rehearsals_table["Information"] = rehearsals_table["Information"].fillna("")
-        rehearsals_table["Rehearsal"] = rehearsals_table["Rehearsal"].fillna("")
+        rehearsals_table["Rehearsal/Performance"] = rehearsals_table["Rehearsal/Performance"].fillna("")
         rehearsals_table.style.set_properties(**{"white-space": "pre-wrap"})
 
         st.write("##### Rehearsal & Performance Schedule as a Table:")
@@ -112,7 +112,7 @@ if class_name:
         # st.markdown(rehearsals_table.to_markdown(index=False))
         st.write("##### Rehearsal & Performance Schedule as a List:")
         for index, row in rehearsals_table.iterrows():
-            st.write(f"**{row['Rehearsal']}**")
+            st.write(f"**{row['Rehearsal/Performance']}**")
             st.write(f"* *_Date_*: {row['Date']}")
             st.write(f"* *_Class_*: {row['Class']}")
             st.write(f"* *_Dance Name_*: {row['Dance Name']}")
