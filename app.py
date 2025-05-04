@@ -51,9 +51,6 @@ if class_name:
         st.write("### Rehearsal and Performance Information:")
         st.write("##### Links to CDF&S Website Rehearsal Information:")
         st.write(
-            "\t [Information on May 3rd Rehearsal](https://www.cdandfs.com/may-3rd-ballet-rehearsal.html)"
-        )
-        st.write(
             "\t [Information for Technical Rehearsal](https://www.cdandfs.com/tech-rehearsals.html)"
         )
         st.write(
