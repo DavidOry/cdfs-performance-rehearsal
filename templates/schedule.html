@@ -73,6 +73,32 @@
       color: #6b6b6b;
       line-height: 1.6;
     }
+    .dressing-room-box {
+      display: inline-block;
+      border: 2px solid #1c1c1c;
+      border-radius: 4px;
+      padding: 4px 10px;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .dressing-room-label {
+      font-size: 7.5pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b6b6b;
+    }
+    .dressing-room-value {
+      font-size: 13pt;
+      font-weight: 700;
+      color: #1c1c1c;
+      line-height: 1.2;
+    }
+    .header-meta {
+      font-size: 7.5pt;
+      color: #6b6b6b;
+      margin-top: 2px;
+    }
 
     /* ── Section label ── */
     .section-label {
@@ -140,7 +166,9 @@
       white-space: nowrap;
       text-decoration: none;
       letter-spacing: 0.03em;
+      cursor: pointer;
     }
+    a.event-pill:hover { opacity: 0.85; }
     .pill-studio { background: #ede8f5; color: #3d2270; border: 1px solid #bfaee0; }
     .pill-tech   { background: #dce8f5; color: #2e4a6b; border: 1px solid #a8c4e0; }
     .pill-dress  { background: #fdf0d0; color: #7a5100; border: 1px solid #e8cc80; }
@@ -168,7 +196,12 @@
       border: 1px solid #d4d0cb;
       padding: 1px 6px;
       font-size: 7.5pt;
-      white-space: nowrap;
+      white-space: normal;
+      word-wrap: break-word;
+    }
+    .notes-cell {
+      max-width: 120px;
+      word-wrap: break-word;
     }
 
     /* Arrival — most important, brick red, bold */
@@ -206,9 +239,13 @@
       <div class="show-name">{{ performance_name }}</div>
     </div>
     <div class="header-right">
-      <div>62 Ridge Street · Montpelier, VT</div>
-      <div>cdandfs.com</div>
-      <div>Generated {{ generated_date }}</div>
+      {% if dressing_room %}
+      <div class="dressing-room-box">
+        <div class="dressing-room-label">Barre Opera House Performance</div>
+        <div class="dressing-room-value">Assignment: {{ dressing_room }}</div>
+      </div>
+      {% endif %}
+      <div class="header-meta">Generated {{ generated_date }}</div>
     </div>
   </div>
 
@@ -234,14 +271,14 @@
     <thead>
       <tr>
         <th style="width:10%">Event</th>
+        <th style="width:14%">Class</th>
         <th style="width:9%">Date</th>
         <th style="width:4%">Day</th>
-        <th style="width:14%">Class</th>
-        <th style="width:17%">Dance / Number</th>
-        <th style="width:13%">Location</th>
+        <th style="width:9%">&#9873; Arrive By</th>
         <th style="width:8%">Start</th>
         <th style="width:7%">End</th>
-        <th style="width:9%">&#9873; Arrive By</th>
+        <th style="width:13%">Location</th>
+        <th style="width:17%">Dance / Number</th>
         <th>Notes</th>
       </tr>
     </thead>
@@ -255,31 +292,18 @@
             <span class="event-pill {{ r.badge_class }}">{{ r.event_type }}</span>
           {% endif %}
         </td>
+        <td class="class-name">{{ r.class_name }}</td>
         <td>{{ r.date }}</td>
         <td><span class="day-pill">{{ r.day_of_week }}</span></td>
-        <td class="class-name">{{ r.class_name }}</td>
-        <td class="dance-name">{{ r.dance_name }}</td>
-        <td>{{ r.location }}</td>
+         <td class="arrival">{{ r.arrival_time }}</td>
         <td class="time-cell">{{ r.start_time }}</td>
         <td class="time-cell">{{ r.end_time }}</td>
-        <td class="arrival">{{ r.arrival_time }}</td>
-        <td>{% if r.information %}<span class="info-pill">{{ r.information }}</span>{% endif %}</td>
+        <td>{{ r.location }}</td>
+        <td class="dance-name">{{ r.dance_name }}</td>
+        <td class="notes-cell">{% if r.information %}<span class="info-pill">{{ r.information }}</span>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-
-  <!-- Footer -->
-  <div class="footer">
-    <div class="footer-note">Arrival time may differ from start times &mdash; please arrive at the stated arrival time. Questions? Contact the studio at cdandfs.com.</div>
-    <div class="legend">
-      <span class="event-pill pill-studio">Studio Rehearsal</span>
-      <span class="event-pill pill-tech">Technical Rehearsal</span>
-      <span class="event-pill pill-dress">Dress Rehearsal</span>
-      <span class="event-pill pill-perf">Performance</span>
-      <span style="margin-left:6px">&#9873; <span class="legend-arrival">Red = your arrival time</span></span>
-    </div>
-  </div>
-
 </body>
 </html>

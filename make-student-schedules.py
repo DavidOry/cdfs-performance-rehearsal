@@ -50,6 +50,7 @@ except ImportError:
             "margin-left":   "0.55in",
             "margin-right":  "0.55in",
             "enable-local-file-access": "",
+            "enable-external-links": "",
             "quiet": "",
         }
         def _html_to_pdf(html_string: str, dest_path: str) -> None:
@@ -90,11 +91,12 @@ RH_INFO       = "information"    # notes / extra info
 RH_URL        = "url"
 
 # ── Column names — class-rosters.xlsx "roster" ────────────────────────────
-RS_CLASS      = "class_name"
-RS_STUDENT    = "student"
+RS_CLASS        = "class_name"
+RS_STUDENT      = "student"
+RS_DRESSING_RM  = "dressing_room"
 
 # ── Studio / show metadata ─────────────────────────────────────────────────
-STUDIO_NAME      = "Creative Dance & Fitness"
+STUDIO_NAME      = "Creative Dance & Fitness Studio"
 PERFORMANCE_NAME = "Spring Performance 2026"
 
 
@@ -209,11 +211,8 @@ def load_classes(schedule_path: str) -> dict[str, dict]:
 
 
 def load_rehearsals(schedule_path: str) -> dict[str, list[dict]]:
-    """Return {class_name: [rehearsal_dict, ...]} sorted by date then start time."""
+    """Return {class_name: [rehearsal_dict, ...]}."""
     df = pd.read_excel(schedule_path, sheet_name=REHEARSALS_SHEET)
-
-    # Sort by date string then start time where possible
-    df = df.sort_values([RH_DATE, RH_START], na_position="last")
 
     result: dict[str, list[dict]] = {}
     for _, row in df.iterrows():
@@ -222,7 +221,20 @@ def load_rehearsals(schedule_path: str) -> dict[str, list[dict]]:
             continue
 
         event_name = _str(row.get(RH_NAME))
-        day_of_week, date_display = _parse_date(row.get(RH_DATE))
+        raw_date   = row.get(RH_DATE)
+        day_of_week, date_display = _parse_date(raw_date)
+
+        # Build a proper datetime sort key so May 2 < May 10
+        sort_date = pd.NaT
+        if hasattr(raw_date, "strftime"):
+            sort_date = raw_date
+        else:
+            for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%B %d", "%b %d"):
+                try:
+                    sort_date = datetime.strptime(str(raw_date).split(",")[-1].strip(), fmt)
+                    break
+                except ValueError:
+                    pass
 
         result.setdefault(class_name, []).append({
             "event_type":   _short_event(event_name),
@@ -236,19 +248,29 @@ def load_rehearsals(schedule_path: str) -> dict[str, list[dict]]:
             "arrival_time": _fmt_time(row.get(RH_ARRIVAL)),
             "information":  _str(row.get(RH_INFO)),
             "url":          _str(row.get(RH_URL)),
+            "_sort_date":   sort_date,
+            "_sort_start":  row.get(RH_START),
         })
     return result
 
 
-def load_rosters(rosters_path: str) -> dict[str, list[str]]:
-    """Return {student_name: [class_name, ...]}."""
+def load_rosters(rosters_path: str) -> dict[str, dict]:
+    """Return {student_name: {"classes": [...], "dressing_room": "..."}}}.
+
+    A student may appear on multiple rows; dressing_room is taken from the
+    first row where it is non-empty.
+    """
     df = pd.read_excel(rosters_path, sheet_name=ROSTER_SHEET)
-    result: dict[str, list[str]] = {}
+    result: dict[str, dict] = {}
     for _, row in df.iterrows():
         student    = _str(row.get(RS_STUDENT))
         class_name = _str(row.get(RS_CLASS))
-        if student and class_name:
-            result.setdefault(student, []).append(class_name)
+        if not student or not class_name:
+            continue
+        entry = result.setdefault(student, {"classes": [], "dressing_room": ""})
+        entry["classes"].append(class_name)
+        if not entry["dressing_room"]:
+            entry["dressing_room"] = _str(row.get(RS_DRESSING_RM))
     return result
 
 
@@ -275,8 +297,21 @@ def build_student_data(
         for r in all_rehearsals.get(class_name, []):
             rehearsals.append({**r, "class_name": class_name})
 
-    # Sort combined rehearsal list by (date_display, start_time)
-    rehearsals.sort(key=lambda r: (r["date"], r["start_time"]))
+    # Sort by actual date then start time, handling NaT safely
+    def _sort_key(r):
+        d = r["_sort_date"]
+        s = r["_sort_start"]
+        # Convert to a comparable value; put NaT/None last
+        d_val = d if pd.notna(d) else datetime.max
+        s_val = s if (s is not None and pd.notna(s)) else datetime.max
+        return (d_val, s_val)
+
+    rehearsals.sort(key=_sort_key)
+
+    # Strip internal keys before handing to template
+    for r in rehearsals:
+        r.pop("_sort_date", None)
+        r.pop("_sort_start", None)
 
     return classes, rehearsals
 
@@ -305,7 +340,8 @@ def generate_schedules(
     print(f"Output dir  : {output_path.resolve()}\n")
 
     for student in sorted(rosters):
-        enrolled = rosters[student]
+        enrolled      = rosters[student]["classes"]
+        dressing_room = rosters[student]["dressing_room"]
         classes, rehearsals = build_student_data(
             student, enrolled, all_classes, all_rehearsals
         )
@@ -317,6 +353,7 @@ def generate_schedules(
             generated_date   = datetime.today().strftime("%B %-d, %Y"),
             classes          = classes,
             rehearsals       = rehearsals,
+            dressing_room    = dressing_room,
         )
 
         dest = output_path / f"{_safe_filename(student)}.pdf"
