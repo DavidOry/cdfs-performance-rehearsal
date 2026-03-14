@@ -94,8 +94,8 @@ RS_CLASS      = "class_name"
 RS_STUDENT    = "student"
 
 # ── Studio / show metadata ─────────────────────────────────────────────────
-STUDIO_NAME      = "Center for Dance & Fine Arts"
-PERFORMANCE_NAME = "Spring Showcase 2025"
+STUDIO_NAME      = "Creative Dance & Fitness"
+PERFORMANCE_NAME = "Spring Performance 2026"
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -222,7 +222,7 @@ def load_rehearsals(schedule_path: str) -> dict[str, list[dict]]:
             continue
 
         event_name = _str(row.get(RH_NAME))
-        day_of_week, date_display = _parse_date(_str(row.get(RH_DATE)))
+        day_of_week, date_display = _parse_date(row.get(RH_DATE))
 
         result.setdefault(class_name, []).append({
             "event_type":   _short_event(event_name),
